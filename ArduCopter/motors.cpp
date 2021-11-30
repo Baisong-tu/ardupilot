@@ -146,20 +146,25 @@ void Copter::motors_output()
 #endif
 
     // Update arming delay state
+    //解锁延迟，解锁后机器不立即启动，延迟两秒
     if (ap.in_arming_delay && (!motors->armed() || millis()-arm_time_ms > ARMING_DELAY_SEC*1.0e3f || control_mode == Mode::Number::THROW)) {
         ap.in_arming_delay = false;
     }
 
     // output any servo channels
+    //输出所有的通道
     SRV_Channels::calc_pwm();
 
     // cork now, so that all channel outputs happen at once
+    //立即触发，所有通道输出
     SRV_Channels::cork();
 
     // update output on any aux channels, for manual passthru
+    //在任何AUX通道上更新输出，手动通过
     SRV_Channels::output_ch_all();
 
     // check if we are performing the motor test
+    //检测我们是否执行电机测试
     if (ap.motor_test) {
         motor_test_output();
     } else {
@@ -177,6 +182,7 @@ void Copter::motors_output()
     }
 
     // push all channels
+    //发送到所有通道
     SRV_Channels::push();
 }
 

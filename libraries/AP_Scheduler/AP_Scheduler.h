@@ -158,7 +158,7 @@ private:
     AP_Int8 _debug;
 
     // overall scheduling rate in Hz
-    AP_Int16 _loop_rate_hz;
+    AP_Int16 _loop_rate_hz;//400
 
     // loop rate in Hz as set at startup
     AP_Int16 _active_loop_rate_hz;

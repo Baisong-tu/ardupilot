@@ -236,21 +236,27 @@ AP_MotorsMulticopter::AP_MotorsMulticopter(uint16_t loop_rate, uint16_t speed_hz
 void AP_MotorsMulticopter::output()
 {
     // update throttle filter
+    //油门输出值一阶低通滤波，输出值限制在0到1
     update_throttle_filter();
 
     // calc filtered battery voltage and lift_max
+    //计算电池电压的最大升力
     update_lift_max_from_batt_voltage();
 
     // run spool logic
+    //输出设置阶段
     output_logic();
 
     // calculate thrust
+    //计算所需要的推力
     output_armed_stabilizing();
 
     // apply any thrust compensation for the frame
+    //申请对无人机结构补偿
     thrust_compensation();
 
     // convert rpy_thrust values to pwm
+    //将推力转化成pwm
     output_to_motors();
 
     // output any booster throttle
@@ -521,7 +527,7 @@ void AP_MotorsMulticopter::output_logic()
         if (_disarm_disable_pwm && (_disarm_safe_timer < _safe_time)) {
             _disarm_safe_timer += 1.0f/_loop_rate;
         } else {
-            _disarm_safe_timer = _safe_time;
+            _disarm_safe_timer = _safe_time;//_safe_time为para 值为1
         }
     } else {
            _disarm_safe_timer = 0.0f;

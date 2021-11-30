@@ -418,6 +418,7 @@ void Mode::get_pilot_desired_lean_angles(float &roll_out, float &pitch_out, floa
     pitch_out *= scaler;
 
     // do circular limit
+    //norm is 平方和开根号
     float total_in = norm(pitch_out, roll_out);
     if (total_in > angle_limit) {
         float ratio = angle_limit / total_in;

@@ -142,6 +142,7 @@ const AP_Param::GroupInfo AC_AttitudeControl::var_info[] = {
     // @Increment: 0.01
     // @Values: 0.5:Very Soft, 0.2:Soft, 0.15:Medium, 0.1:Crisp, 0.05:Very Crisp
     // @User: Standard
+    //copter 内的参数为 0.15
     AP_GROUPINFO("INPUT_TC", 20, AC_AttitudeControl, _input_tc, AC_ATTITUDE_CONTROL_INPUT_TC_DEFAULT),
 
     AP_GROUPEND
@@ -264,6 +265,7 @@ void AC_AttitudeControl::input_euler_angle_roll_pitch_euler_rate_yaw(float euler
         // When acceleration limiting and feedforward are enabled, the sqrt controller is used to compute an euler
         // angular velocity that will cause the euler angle to smoothly stop at the input angle with limited deceleration
         // and an exponential decay specified by smoothing_gain at the end.
+        //wrap_PI将输入的弧度转换到-pi到+pi。wrap_PI内传入的形参是上一步函数得到的期望欧拉角（pilot rc 输入）减去本函数得到的实时欧拉角
         _attitude_target_euler_rate.x = input_shaping_angle(wrap_PI(euler_roll_angle - _attitude_target_euler_angle.x), _input_tc, euler_accel.x, _attitude_target_euler_rate.x, _dt);
         _attitude_target_euler_rate.y = input_shaping_angle(wrap_PI(euler_pitch_angle - _attitude_target_euler_angle.y), _input_tc, euler_accel.y, _attitude_target_euler_rate.y, _dt);
 
@@ -274,6 +276,7 @@ void AC_AttitudeControl::input_euler_angle_roll_pitch_euler_rate_yaw(float euler
         // Convert euler angle derivative of desired attitude into a body-frame angular velocity vector for feedforward
         euler_rate_to_ang_vel(_attitude_target_euler_angle, _attitude_target_euler_rate, _attitude_target_ang_vel);
         // Limit the angular velocity
+        //_ang_vel_roll_max _ang_vel_pitch_max _ang_vel_yaw_max都为零，所以下面这个函数不执行
         ang_vel_limit(_attitude_target_ang_vel, radians(_ang_vel_roll_max), radians(_ang_vel_pitch_max), radians(_ang_vel_yaw_max));
         // Convert body-frame angular velocity into euler angle derivative of desired attitude
         ang_vel_to_euler_rate(_attitude_target_euler_angle, _attitude_target_ang_vel, _attitude_target_euler_rate);
@@ -662,9 +665,11 @@ void AC_AttitudeControl::attitude_controller_run_quat()
     thrust_heading_rotation_angles(_attitude_target_quat, attitude_vehicle_quat, attitude_error_vector, _thrust_error_angle);
 
     // Compute the angular velocity target from the attitude error
+    //由姿态误差计算目标角速率，此处使用了ATC_ANG_PIT_P,4.5；ATC_ANG_RLL_P,4.5； ATC_ANG_YAW_P,4.5这三个角度环的三个P参数
     _rate_target_ang_vel = update_ang_vel_target_from_att_error(attitude_error_vector);
 
     // Add feedforward term that attempts to ensure that roll and pitch errors rotate with the body frame rather than the reference frame.
+    //添加前馈项，尝试确保滚转和俯仰误差随车身框架而不是参考框架旋转。
     // todo: this should probably be a matrix that couples yaw as well.
     _rate_target_ang_vel.x += constrain_float(attitude_error_vector.y, -M_PI / 4, M_PI / 4) * _ahrs.get_gyro().z;
     _rate_target_ang_vel.y += -constrain_float(attitude_error_vector.x, -M_PI / 4, M_PI / 4) * _ahrs.get_gyro().z;
@@ -769,6 +774,7 @@ void AC_AttitudeControl::thrust_heading_rotation_angles(Quaternion& att_to_quat,
 
 // calculates the velocity correction from an angle error. The angular velocity has acceleration and
 // deceleration limits including basic jerk limiting using _input_tc
+//根据角度误差计算速度校正
 float AC_AttitudeControl::input_shaping_angle(float error_angle, float input_tc, float accel_max, float target_ang_vel, float dt)
 {
     // Calculate the velocity as error approaches zero with acceleration limited by accel_max_radss
@@ -779,6 +785,7 @@ float AC_AttitudeControl::input_shaping_angle(float error_angle, float input_tc,
 }
 
 // limits the acceleration and deceleration of a velocity request
+//根据实时角速率和最大加速度，将期望角速率限制在最大加速度范围内
 float AC_AttitudeControl::input_shaping_ang_vel(float target_ang_vel, float desired_ang_vel, float accel_max, float dt)
 {
     // Acceleration is limited directly to smooth the beginning of the curve.

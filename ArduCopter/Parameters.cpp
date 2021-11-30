@@ -64,6 +64,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Units: Hz
     // @Range: 0 10
     // @Increment: .5
+    // copter 0
     GSCALAR(throttle_filt,  "PILOT_THR_FILT",     0),
 
     // @Param: PILOT_TKOFF_ALT

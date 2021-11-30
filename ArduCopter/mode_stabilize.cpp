@@ -12,6 +12,7 @@ void ModeStabilize::run()
     update_simple_mode();
 
     // convert pilot input to lean angles
+    //  copter.aparm.angle_max is 4500 in fram
     float target_roll, target_pitch;
     get_pilot_desired_lean_angles(target_roll, target_pitch, copter.aparm.angle_max, copter.aparm.angle_max);
 
@@ -55,6 +56,7 @@ void ModeStabilize::run()
     }
 
     // call attitude controller
+    // 这个函数只涉及到角度环的P参数，并且使用了前馈控制
     attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
 
     // output pilot's throttle
