@@ -165,6 +165,9 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             break;
 #endif
 
+        case Mode::Number::TUDAO:
+            ret = &mode_tudao;
+            break;
 #if MODE_AUTOROTATE_ENABLED == ENABLED
         case Mode::Number::AUTOROTATE:
             ret = &mode_autorotate;
