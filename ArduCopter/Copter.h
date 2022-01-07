@@ -67,6 +67,7 @@
 #include <AP_TempCalibration/AP_TempCalibration.h>
 #include <AC_AutoTune/AC_AutoTune.h>
 #include <AP_Common/AP_FWVersion.h>
+#include <AP_OpenMV/AP_OpenMV.h>
 
 // Configuration
 #include "defines.h"
@@ -267,6 +268,8 @@ private:
     RC_Channel *channel_yaw;
 
     AP_Logger logger;
+
+    AP_OpenMV openmv{};
 
     // flight modes convenience array
     AP_Int8 *flight_modes;
@@ -661,6 +664,7 @@ private:
     void rc_loop();
     void throttle_loop();
     void update_batt_compass(void);
+    void update_OpenMV(void);
     void fourhundred_hz_logging();
     void ten_hz_logging_loop();
     void twentyfive_hz_logging();
@@ -780,6 +784,7 @@ private:
     void standby_update();
 
     // Log.cpp
+    void Log_Write_OpenMV();
     void Log_Write_Control_Tuning();
     void Log_Write_Performance();
     void Log_Write_Attitude();
